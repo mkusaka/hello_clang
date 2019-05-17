@@ -9,7 +9,7 @@ jobs:
           name: run test
           command: |
               cd src
-              make test
+              make test > result.txt
       - store_artifacts:
           path: ./src/
 workflows:

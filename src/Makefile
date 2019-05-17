@@ -1,7 +1,7 @@
 tim: tim.c
 
 test: tim
-				./test.sh | tee result.txt
+				./test.sh
 
 clean:
-				rm -f tim *.o *~ tmp* result.txt
+				rm -f tim *.o *~ tmp*
