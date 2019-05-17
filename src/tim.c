@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
     if (*p == '-') {
       p++;
-      printf("  add rax, %ld\n", strtol(p, &p, 10));
+      printf("  sub rax, %ld\n", strtol(p, &p, 10));
       continue;
     }
 
