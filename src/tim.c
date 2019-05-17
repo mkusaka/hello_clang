@@ -15,6 +15,11 @@ int main(int argc, char **argv) {
   printf("  mov rax, %ld\n", strtol(p, &p, 10));
 
   while (*p) {
+    if (*p == ' ') {
+      p++;
+      continue;
+    }
+
     if (*p == '+') {
       p++;
       printf("  add rax, %ld\n", strtol(p, &p, 10));
