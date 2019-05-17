@@ -3,7 +3,7 @@ services:
   main:
     build: .
     volumes:
-    - ./src:/home/
+    - ./src:/home/src/
     entrypoint:
       - tail
       - -f
