@@ -84,3 +84,5 @@ Temporary Items
 *.o
 tmp*
 tim
+
+.vscode/
