@@ -13,6 +13,7 @@ try() {
     echo "$input => $actual"
   else
     echo "$expected expected, but got $actual"
+    exit 1
   fi
 }
 
