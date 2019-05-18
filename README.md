@@ -18,6 +18,23 @@ $ docker-compose exec main bash
 ```
 
 ## compile
+### form mac terminal
+build
+```bash
+$ docker-compose exec main make
+```
+
+test
+```bash
+$ docker-compose exec main make test
+```
+
+clean up build assets
+```bash
+$ docker-compose exec main make clean
+```
+
+### from inside docker
 build
 ```bash
 $ make
@@ -34,4 +51,4 @@ $ make clean
 ```
 
 # ref
-[低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook/)
+- [低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook/)
