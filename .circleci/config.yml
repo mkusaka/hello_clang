@@ -10,6 +10,7 @@ jobs:
           command: |
               cd src
               make test > result.txt
+              cat result.txt
       - store_artifacts:
           path: ./src/
 workflows:
