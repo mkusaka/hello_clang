@@ -4,37 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum {
-  TK_NUM = 256, // 整数トークン
-  TK_EOF,       // 入力の終了トークン
-};
-
-typedef struct {
-  int ty;       // 型
-  int val;      // 整数トークンの場合の値
-} Token;
-
-
-// 抽象構文機ののノードの型
-
-enum {
-  ND_NUM = 256, // 整数ノードの型
-};
-
-typedef struct Node {
-  int ty;             // 演算子かND_NUM
-  struct Node *lhs;   // 左辺
-  struct Npde *rhs;   // 右辺
-  int val;
-} Node;
-
 char *user_input; // 入力プログラム
 
-// トークナイズした配列
-// 100しかトークナイズできないのでそれ以上長いと扱えない
-Token tokens[100];
-
-void error(char *fmt, ...) {
+// error関数群
+void error(char *fmt, ...)
+{
   // 可変長引数のリスト http://kwski.net/cplusplus/209/
   va_list ap;
   // 可変長引数の初期化 http://www.c-tipsref.com/reference/stdarg/va_start.html
@@ -47,13 +21,29 @@ void error(char *fmt, ...) {
 }
 
 // エラー報告のための関数
-void error_at(char *loc, char *msg) {
+void error_at(char *loc, char *msg)
+{
   int pos = loc - user_input;
   fprintf(stderr, "%s\n", user_input);
   fprintf(stderr, "%*s", pos, ""); // pos個の空白表示
   fprintf(stderr, "^ %s\n", msg);
   exit(1);
 }
+
+// token
+enum {
+  TK_NUM = 256, // 整数トークン
+  TK_EOF,       // 入力の終了トークン
+};
+
+typedef struct {
+  int ty;       // 型
+  int val;      // 整数トークンの場合の値
+} Token;
+
+// トークナイズした配列
+// 100しかトークナイズできないのでそれ以上長いと扱えない
+Token tokens[100];
 
 void tokenize() {
   char *p = user_input;
@@ -89,6 +79,18 @@ void tokenize() {
   tokens[i].ty = TK_EOF;
   tokens[i].input = p;
 }
+
+// node
+enum {
+  ND_NUM = 256, // 整数ノードの型
+};
+
+typedef struct Node {
+  int ty;             // 演算子かND_NUM
+  struct Node *lhs;   // 左辺
+  struct Npde *rhs;   // 右辺
+  int val;
+} Node;
 
 int main(int argc, char **argv) {
   if (argc !=2) {
