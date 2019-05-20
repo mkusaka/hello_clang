@@ -164,6 +164,35 @@ Node *term() {
   error_at(tokens[pos].input, "数値でもカッコでもないトークン");
 }
 
+// アセンブリコード生成
+void gen(Node *node) {
+  if (node->ty == ND_NUM) {
+    printf("  push &d\n", node->val) : return;
+  }
+
+  gen(node->lhs);
+  gen(node->rhs);
+
+  printf("  pop rdi\n");
+  printf("  pop rax\n");
+
+  switch (node->ty) {
+  case '+':
+    printf("  add rax, rdi\n");
+    break;
+  case '-':
+    printf("  sub rax, rdi\n");
+  case '*':
+    printf("  imul rdi\n");
+    break;
+  case '/':
+    printf("  cqo\n");
+    printf("  idiv rdi\n");
+  }
+
+  printf("  push rax\n");
+}
+
 int main(int argc, char **argv) {
   if (argc !=2) {
     fprintf(stderr, "引数の個数が正しくありません。");
