@@ -134,6 +134,19 @@ Node *expr() {
   }
 }
 
+Node *mul() {
+  Node *node = term();
+
+  for (;;) {
+    if (consume('*'))
+      node = new_node('*', node, mul());
+    else if (consume('/'))
+      node = new_node('/', node, mul());
+    else
+      return node;
+  }
+}
+
 int main(int argc, char **argv) {
   if (argc !=2) {
     fprintf(stderr, "引数の個数が正しくありません。");
