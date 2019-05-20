@@ -39,6 +39,7 @@ enum {
 typedef struct {
   int ty;       // 型
   int val;      // 整数トークンの場合の値
+  char *input;
 } Token;
 
 // トークナイズした配列
@@ -145,6 +146,22 @@ Node *mul() {
     else
       return node;
   }
+}
+
+Node *term() {
+  if (consume('(')) {
+    Node *node = expr();
+    if (!consume(')'))
+      error_at(tokens[pos].input, "閉じカッコに対応するカッコがありません");
+
+    return node;
+  }
+
+  // カッコでなければ数値
+  if (tokens[pos].ty == TK_NUM)
+    return newnodemu(tokens[pos++].val);
+
+  error_at(tokens[pos].input, "数値でもカッコでもないトークン");
 }
 
 int main(int argc, char **argv) {
