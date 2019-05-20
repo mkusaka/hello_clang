@@ -109,6 +109,16 @@ Node *new_node_num(int val) {
   return node;
 }
 
+// utils
+// 型をチェックして、期待した型であればトークンを一つ進めて真を返す
+
+int comsume(int ty) {
+  if (tokens[pos].ty != ty)
+    return 0;
+  pos++;
+  return 1;
+}
+
 int main(int argc, char **argv) {
   if (argc !=2) {
     fprintf(stderr, "引数の個数が正しくありません。");
