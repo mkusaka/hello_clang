@@ -4,8 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum
-{
+enum {
   TK_NUM = 256, // 整数トークン
   TK_EOF,       // 入力の終了トークン
 };
@@ -13,8 +12,21 @@ enum
 typedef struct {
   int ty;       // 型
   int val;      // 整数トークンの場合の値
-  char *input;  // エラーメッセージ用のトークン文字列
 } Token;
+
+
+// 抽象構文機ののノードの型
+
+enum {
+  ND_NUM = 256, // 整数ノードの型
+};
+
+typedef struct Node {
+  int ty;             // 演算子かND_NUM
+  struct Node *lhs;   // 左辺
+  struct Npde *rhs;   // 右辺
+  int val;
+} Node;
 
 char *user_input; // 入力プログラム
 
