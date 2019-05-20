@@ -88,9 +88,26 @@ enum {
 typedef struct Node {
   int ty;             // 演算子かND_NUM
   struct Node *lhs;   // 左辺
-  struct Npde *rhs;   // 右辺
+  struct Node *rhs;   // 右辺
   int val;
 } Node;
+
+// nodeを新規作成する
+Node *new_node(int ty, Node *lhs,Node *rhs) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ty;
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
+
+// numのnodeを新規作成する
+Node *new_node_num(int val) {
+  Node *node = malloc(sizeof(Node));
+  node->ty = ND_NUM;
+  node->val = val;
+  return node;
+}
 
 int main(int argc, char **argv) {
   if (argc !=2) {
