@@ -113,6 +113,8 @@ Node *new_node_num(int val) {
 // utils
 // 型をチェックして、期待した型であればトークンを一つ進めて真を返す
 
+int pos = 0;
+
 int comsume(int ty) {
   if (tokens[pos].ty != ty)
     return 0;
@@ -120,7 +122,7 @@ int comsume(int ty) {
   return 1;
 }
 
-// パースする関数
+
 //  expr = mul ("+" mul | "-" mul)* と対応
 Node *expr() {
   Node *node = mul();
@@ -135,6 +137,7 @@ Node *expr() {
   }
 }
 
+// パースする関数
 Node *mul() {
   Node *node = term();
 
@@ -167,7 +170,8 @@ Node *term() {
 // アセンブリコード生成
 void gen(Node *node) {
   if (node->ty == ND_NUM) {
-    printf("  push &d\n", node->val) : return;
+    printf("  push %d\n", node->val);
+    return;
   }
 
   gen(node->lhs);
