@@ -1,4 +1,5 @@
 # hello_clang
+[![CircleCI](https://circleci.com/gh/mkusaka/hello_clang/tree/master.svg?style=svg)](https://circleci.com/gh/mkusaka/hello_clang/tree/master)
 
 # command list
 ## docker env
