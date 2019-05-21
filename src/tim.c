@@ -122,6 +122,12 @@ int comsume(int ty) {
   return 1;
 }
 
+// prototype宣言
+// 関数は使用する前に宣言されている必要がある
+
+Node *expr();
+Node *mul();
+Node *term();
 
 //  expr = mul ("+" mul | "-" mul)* と対応
 Node *expr() {
