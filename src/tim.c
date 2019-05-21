@@ -115,7 +115,7 @@ Node *new_node_num(int val) {
 
 int pos = 0;
 
-int comsume(int ty) {
+int consume(int ty) {
   if (tokens[pos].ty != ty)
     return 0;
   pos++;
@@ -168,7 +168,7 @@ Node *term() {
 
   // カッコでなければ数値
   if (tokens[pos].ty == TK_NUM)
-    return newnodemu(tokens[pos++].val);
+    return new_node_num(tokens[pos++].val);
 
   error_at(tokens[pos].input, "数値でもカッコでもないトークン");
 }
