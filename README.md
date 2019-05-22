@@ -1,6 +1,30 @@
 # hello_clang
 [![CircleCI](https://circleci.com/gh/mkusaka/hello_clang/tree/master.svg?style=svg)](https://circleci.com/gh/mkusaka/hello_clang/tree/master)
 
+# quick start
+
+install [Docker](https://www.docker.com/), clone this repository and...
+
+wakeup docker container
+```bash
+bin/wakeup
+```
+
+into docker container
+```bash
+bin/console
+```
+
+build
+```bash
+make
+```
+
+build && test
+```
+make test
+```
+
 # command list
 ## docker env
 run container
