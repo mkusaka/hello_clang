@@ -5,3 +5,7 @@ test: tim
 
 clean:
 				rm -f tim *.o *~ tmp*
+
+tc: tim
+				make test
+				make clean
