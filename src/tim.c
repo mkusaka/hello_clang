@@ -149,9 +149,9 @@ Node *mul() {
 
   for (;;) {
     if (consume('*'))
-      node = new_node('*', node, mul());
+      node = new_node('*', node, term());
     else if (consume('/'))
-      node = new_node('/', node, mul());
+      node = new_node('/', node, term());
     else
       return node;
   }
