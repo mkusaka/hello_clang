@@ -58,7 +58,7 @@ void tokenize(char *user_input) {
     }
 
     // `+` または `-` であればtokensに格納する
-    if (*p == '+' || *p == '-') {
+    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
