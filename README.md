@@ -78,10 +78,11 @@ $ make clean
 # ref
 - [低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook/)
 
+# progress
 - [x] ステップ1
 - [x] ステップ2
 - [x] ステップ3
-- [ ] ステップ4
+- [x] ステップ4
 - [ ] ステップ4
 - [ ] ステップ5
 - [ ] ステップ6
