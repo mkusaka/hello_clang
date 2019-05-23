@@ -192,6 +192,7 @@ void gen(Node *node) {
     break;
   case '-':
     printf("  sub rax, rdi\n");
+    break;
   case '*':
     printf("  imul rdi\n");
     break;
