@@ -46,7 +46,7 @@ typedef struct {
 // 100しかトークナイズできないのでそれ以上長いと扱えない
 Token tokens[100];
 
-void tokenize() {
+void tokenize(char *user_input) {
   char *p = user_input;
 
   int i = 0;
