@@ -34,6 +34,10 @@ void error_at(char *loc, char *msg)
 enum {
   TK_NUM = 256, // 整数トークン
   TK_EOF,       // 入力の終了トークン
+  TK_EQ,        // 比較演算子等しい
+  TK_NE,        // 比較演算子等しくない
+  TK_LE,        // 比較演算子小さい
+  TK_GE         // 比較演算子大きい
 };
 
 typedef struct {
@@ -57,8 +61,36 @@ void tokenize(char *user_input) {
       continue;
     }
 
+    if (strncmp(p, "==", 2) == 0) {
+      tokens[i].ty = TK_EQ;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "!=", 2) == 0) {
+      tokens[i].ty = TK_NE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "<=", 2) == 0) {
+      tokens[i].ty = TK_LE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, ">=", 2) == 0) {
+      tokens[i].ty = TK_GE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
     // `+` または `-` であればtokensに格納する
-    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
@@ -126,12 +158,57 @@ int consume(int ty) {
 // 関数は使用する前に宣言されている必要がある
 
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
-Node *term();
 Node *unary();
+Node *term();
 
-//  expr = mul ("+" mul | "-" mul)* と対応
+// expr = equality と対応
 Node *expr() {
+  return equality();
+}
+
+// 等号
+// equality = relational ("==" relational | "!=" relational)* と対応
+Node *equality() {
+  Node *node = relational();
+
+  for (;;) {
+    if (consume(TK_EQ))
+      node = new_node(TK_EQ, node, relational());
+    else if (consume(TK_NE))
+      node = new_node(TK_NE, node, relational());
+    else
+      return node;
+  }
+}
+
+// 大小関係
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)* と対応
+Node *relational() {
+  Node *node = add();
+
+  for (;;) {
+    if (consume(TK_LE))
+      node = new_node(TK_LE, node, add());
+    else if (consume(TK_GE))
+      // genで TK_LE の逆操作を使用するために順序を変更
+      node = new_node(TK_GE, add(), node);
+    else if (consume('<'))
+      node = new_node('<', node, add());
+    else if (consume('>'))
+      // genで TK_LE の逆操作を使用するために順序を変更
+      node = new_node('>', add(), node);
+    else
+      return node;
+  }
+}
+
+// 足し算、引き算
+// add = mul ("+" mul | "-" mul)* と対応
+Node *add() {
   Node *node = mul();
 
   for (;;) {
@@ -144,7 +221,8 @@ Node *expr() {
   }
 }
 
-// パースする関数
+// 乗算、除算
+// mul = unary ("*" unary | "/" unary)* と対応
 Node *mul() {
   Node *node = unary();
 
@@ -158,6 +236,18 @@ Node *mul() {
   }
 }
 
+// 単項演算子
+// unary = ("+" | "-")? term と対応
+Node *unary() {
+  if (consume('+'))
+    return term();
+  if (consume('-'))
+    return new_node('-', new_node_num(0), term());
+  return term();
+}
+
+// 括弧、数字
+// term = num | "(" expr ")" と対応
 Node *term() {
   if (consume('(')) {
     Node *node = expr();
@@ -172,14 +262,6 @@ Node *term() {
     return new_node_num(tokens[pos++].val);
 
   error_at(tokens[pos].input, "数値でもカッコでもないトークン");
-}
-
-Node *unary() {
-  if (consume('+'))
-    return term();
-  if (consume('-'))
-    return new_node('-', new_node_num(0), term());
-  return term();
 }
 
 // アセンブリコード生成
@@ -208,6 +290,37 @@ void gen(Node *node) {
   case '/':
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case TK_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  sete al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case TK_NE:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case TK_LE:
+    printf("  cmp rax, rdi\n");
+    printf("  setle al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case TK_GE:
+    printf("  cmp rax, rdi\n");
+    printf("  setle al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case '<':
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case '>':
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzb rax, al\n");
+    break;
   }
 
   printf("  push rax\n");
