@@ -34,10 +34,10 @@ void error_at(char *loc, char *msg)
 enum {
   TK_NUM = 256, // 整数トークン
   TK_EOF,       // 入力の終了トークン
-  TK_EQ, // 等しい
-  TK_NE, // 等しくない
-  TK_LE, // 小さい
-  TK_GE // 大きい
+  TK_EQ,        // 比較演算子等しい
+  TK_NE,        // 比較演算子等しくない
+  TK_LE,        // 比較演算子小さい
+  TK_GE         // 比較演算子大きい
 };
 
 typedef struct {
@@ -165,12 +165,13 @@ Node *mul();
 Node *unary();
 Node *term();
 
+// expr = equality と対応
 Node *expr() {
   return equality();
 }
 
 // 等号
-
+// equality = relational ("==" relational | "!=" relational)* と対応
 Node *equality() {
   Node *node = relational();
 
@@ -185,6 +186,7 @@ Node *equality() {
 }
 
 // 大小関係
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)* と対応
 Node *relational() {
   Node *node = add();
 
@@ -202,7 +204,7 @@ Node *relational() {
   }
 }
 
-// 足し算
+// 足し算、引き算
 // add = mul ("+" mul | "-" mul)* と対応
 Node *add() {
   Node *node = mul();
@@ -217,7 +219,8 @@ Node *add() {
   }
 }
 
-// パースする関数
+// 乗算、除算
+// mul = unary ("*" unary | "/" unary)* と対応
 Node *mul() {
   Node *node = unary();
 
@@ -231,6 +234,18 @@ Node *mul() {
   }
 }
 
+// 単項演算子
+// unary = ("+" | "-")? term と対応
+Node *unary() {
+  if (consume('+'))
+    return term();
+  if (consume('-'))
+    return new_node('-', new_node_num(0), term());
+  return term();
+}
+
+// 括弧、数字
+// term = num | "(" expr ")" と対応
 Node *term() {
   if (consume('(')) {
     Node *node = expr();
@@ -245,14 +260,6 @@ Node *term() {
     return new_node_num(tokens[pos++].val);
 
   error_at(tokens[pos].input, "数値でもカッコでもないトークン");
-}
-
-Node *unary() {
-  if (consume('+'))
-    return term();
-  if (consume('-'))
-    return new_node('-', new_node_num(0), term());
-  return term();
 }
 
 // アセンブリコード生成
