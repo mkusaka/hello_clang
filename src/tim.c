@@ -58,7 +58,7 @@ void tokenize(char *user_input) {
     }
 
     // `+` または `-` であればtokensに格納する
-    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')') {
+    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '==' || *p == '!=' || *p == '<' || *p == '<=' || *p == '>' || *p == '>=') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
@@ -126,12 +126,53 @@ int consume(int ty) {
 // 関数は使用する前に宣言されている必要がある
 
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
 Node *mul();
-Node *term();
 Node *unary();
+Node *term();
 
-//  expr = mul ("+" mul | "-" mul)* と対応
 Node *expr() {
+  return equality();
+}
+
+// 等号
+
+Node *equality() {
+  Node *node = relational();
+
+  for (;;) {
+    if (consume('=='))
+      node = new_node('==', node, relational());
+    else if (consume('!='))
+      node = new_node('!=', node, relational());
+    else
+      return node;
+  }
+}
+
+// 大小関係
+Node *relational() {
+  Node *node = add();
+
+  for (;;) {
+    if (consume('<='))
+      node = new_node('<=', node, add());
+    else if (consume('>='))
+      node = new_node('>=', node, add());
+    else if (consume('<'))
+      node = new_node('<', node, add());
+    else if (consume('>'))
+      node = new_node('>', node, add());
+    else
+      return node;
+  }
+}
+
+// 足し算
+// add = mul ("+" mul | "-" mul)* と対応
+Node *add() {
   Node *node = mul();
 
   for (;;) {
@@ -181,6 +222,16 @@ Node *unary() {
     return new_node('-', new_node_num(0), term());
   return term();
 }
+
+// 比較演算子
+enum {
+  TK_EQ, // 等しい
+  TK_NE, // 等しくない
+  TK_LE, // 小さい
+  TK_GE, // 大きい
+  TK_LT, // 真に小さい
+  TK_GT  // 真に大きい
+};
 
 // アセンブリコード生成
 void gen(Node *node) {
