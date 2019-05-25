@@ -34,6 +34,10 @@ void error_at(char *loc, char *msg)
 enum {
   TK_NUM = 256, // 整数トークン
   TK_EOF,       // 入力の終了トークン
+  TK_EQ, // 等しい
+  TK_NE, // 等しくない
+  TK_LE, // 小さい
+  TK_GE // 大きい
 };
 
 typedef struct {
@@ -57,8 +61,36 @@ void tokenize(char *user_input) {
       continue;
     }
 
+    if (strncmp(p, "==", 2)) {
+      tokens[i].ty = TK_EQ;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "!=", 2)) {
+      tokens[i].ty = TK_NE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, "<=", 2)) {
+      tokens[i].ty = TK_LE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
+    if (strncmp(p, ">=", 2)) {
+      tokens[i].ty = TK_GE;
+      tokens[i].input = p;
+      i++;
+      p += 2;
+    }
+
     // `+` または `-` であればtokensに格納する
-    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '==' || *p == '!=' || *p == '<' || *p == '<=' || *p == '>' || *p == '>=') {
+    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
       tokens[i].ty = *p;
       tokens[i].input = p;
       i++;
@@ -143,10 +175,10 @@ Node *equality() {
   Node *node = relational();
 
   for (;;) {
-    if (consume('=='))
-      node = new_node('==', node, relational());
-    else if (consume('!='))
-      node = new_node('!=', node, relational());
+    if (consume(TK_EQ))
+      node = new_node(TK_EQ, node, relational());
+    else if (consume(TK_NE))
+      node = new_node(TK_NE, node, relational());
     else
       return node;
   }
@@ -157,10 +189,10 @@ Node *relational() {
   Node *node = add();
 
   for (;;) {
-    if (consume('<='))
-      node = new_node('<=', node, add());
-    else if (consume('>='))
-      node = new_node('>=', node, add());
+    if (consume(TK_LE))
+      node = new_node(TK_LE, node, add());
+    else if (consume(TK_GE))
+      node = new_node(TK_GE, node, add());
     else if (consume('<'))
       node = new_node('<', node, add());
     else if (consume('>'))
@@ -222,16 +254,6 @@ Node *unary() {
     return new_node('-', new_node_num(0), term());
   return term();
 }
-
-// 比較演算子
-enum {
-  TK_EQ, // 等しい
-  TK_NE, // 等しくない
-  TK_LE, // 小さい
-  TK_GE, // 大きい
-  TK_LT, // 真に小さい
-  TK_GT  // 真に大きい
-};
 
 // アセンブリコード生成
 void gen(Node *node) {
