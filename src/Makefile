@@ -1,6 +1,7 @@
 tim: tim.c
 
 test: tim
+				./tim -test
 				./test.sh
 
 clean:
