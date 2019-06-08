@@ -1,3 +1,5 @@
+CFLAGS=-g -O0
+
 tim: tim.c
 
 test: tim

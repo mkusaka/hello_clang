@@ -46,9 +46,10 @@ typedef struct {
   char *input;
 } Token;
 
-// トークナイズした配列
-// 100しかトークナイズできないのでそれ以上長いと扱えない
-Token tokens[100];
+
+// // トークナイズした配列
+// // 100しかトークナイズできないのでそれ以上長いと扱えない
+// Token tokens[100];
 
 // 可変長ベクタ
 typedef struct {
@@ -65,6 +66,9 @@ Vector *new_vector() {
   return vec;
 }
 
+// @param Vector *vec 要素を追加するベクトル
+// @param void *elem ベクトルに追加される要素
+// @return void
 void vec_push(Vector *vec, void *elem) {
   if (vec->capacity == vec->len) {
     vec->capacity *= 2;
@@ -72,6 +76,12 @@ void vec_push(Vector *vec, void *elem) {
   }
   vec->data[vec->len++] = elem;
 }
+
+// トークナイズした配列
+// 可変長配列として定義されている
+Vector* tokens;
+
+// Token tokens[100];
 
 // test for vector
 
@@ -109,46 +119,58 @@ void tokenize(char *user_input) {
     }
 
     if (strncmp(p, "==", 2) == 0) {
-      tokens[i].ty = TK_EQ;
-      tokens[i].input = p;
+      Token tk;
+      tk.ty = TK_EQ;
+      tk.input = p;
+      vec_push(tokens, &tk);
       i++;
       p += 2;
     }
 
     if (strncmp(p, "!=", 2) == 0) {
-      tokens[i].ty = TK_NE;
-      tokens[i].input = p;
+      Token tk;
+      tk.ty = TK_NE;
+      tk.input = p;
+      vec_push(tokens, &tk);
       i++;
       p += 2;
     }
 
     if (strncmp(p, "<=", 2) == 0) {
-      tokens[i].ty = TK_LE;
-      tokens[i].input = p;
+      Token tk;
+      tk.ty = TK_LE;
+      tk.input = p;
+      vec_push(tokens, &tk);
       i++;
       p += 2;
     }
 
     if (strncmp(p, ">=", 2) == 0) {
-      tokens[i].ty = TK_GE;
-      tokens[i].input = p;
+      Token tk;
+      tk.ty = TK_GE;
+      tk.input = p;
+      vec_push(tokens, &tk);
       i++;
       p += 2;
     }
 
     // `+` または `-` であればtokensに格納する
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
-      tokens[i].ty = *p;
-      tokens[i].input = p;
+      Token tk;
+      tk.ty = *p;
+      tk.input = p;
+      vec_push(tokens, &tk);
       i++;
       p++;
       continue;
     }
 
     if (isdigit(*p)) {
-      tokens[i].ty = TK_NUM;
-      tokens[i].input = p;
-      tokens[i].val = strtol(p, &p, 10);
+      Token tk;
+      tk.ty = TK_NUM;
+      tk.input = p;
+      tk.val = strtol(p, &p, 10);
+      vec_push(tokens, &tk);
       i++;
       continue;
     }
@@ -156,8 +178,10 @@ void tokenize(char *user_input) {
     error_at(p, "トークナイズできません");
   }
 
-  tokens[i].ty = TK_EOF;
-  tokens[i].input = p;
+  Token tk;
+  tk.ty = TK_EOF;
+  tk.input = p;
+  vec_push(tokens, &tk);
 }
 
 // node
@@ -195,7 +219,7 @@ Node *new_node_num(int val) {
 int pos = 0;
 
 int consume(int ty) {
-  if (tokens[pos].ty != ty)
+  if (((Token *)(tokens->data[pos]))->ty != ty)
     return 0;
   pos++;
   return 1;
@@ -299,16 +323,16 @@ Node *term() {
   if (consume('(')) {
     Node *node = expr();
     if (!consume(')'))
-      error_at(tokens[pos].input, "閉じカッコに対応するカッコがありません");
+      error_at(((Token *)(tokens->data[pos]))->input, "閉じカッコに対応するカッコがありません");
 
     return node;
   }
 
   // カッコでなければ数値
-  if (tokens[pos].ty == TK_NUM)
-    return new_node_num(tokens[pos++].val);
+  if (((Token *)(tokens->data[pos]))->ty == TK_NUM)
+    return new_node_num(((Token *)(tokens->data[pos++]))->val);
 
-  error_at(tokens[pos].input, "数値でもカッコでもないトークン");
+  error_at(((Token *)(tokens->data[pos]))->input, "数値でもカッコでもないトークン");
 }
 
 // アセンブリコード生成
@@ -374,8 +398,8 @@ void gen(Node *node) {
 }
 
 int main(int argc, char **argv) {
-  if (argc !=2) {
-    fprintf(stderr, "引数の個数が正しくありません。");
+  if (argc != 2) {
+    fprintf(stderr, "引数の個数が正しくありません。\n");
     return 1;
   }
 
@@ -383,6 +407,8 @@ int main(int argc, char **argv) {
     runtest();
     return 0;
   }
+
+  tokens = new_vector();
 
   tokenize(argv[1]);
   Node *node = expr();
