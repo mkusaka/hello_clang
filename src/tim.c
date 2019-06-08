@@ -110,7 +110,6 @@ void runtest() {
 void tokenize(char *user_input) {
   char *p = user_input;
 
-  int i = 0;
   while (*p) {
     // 空白はスキップ
     if (isspace(*p)) {
@@ -118,70 +117,64 @@ void tokenize(char *user_input) {
       continue;
     }
 
+    Token *token = malloc(sizeof(Token));
+
     if (strncmp(p, "==", 2) == 0) {
-      Token tk;
-      tk.ty = TK_EQ;
-      tk.input = p;
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = TK_EQ;
+      token->input = p;
+      vec_push(tokens, token);
       p += 2;
+      continue;
     }
 
     if (strncmp(p, "!=", 2) == 0) {
-      Token tk;
-      tk.ty = TK_NE;
-      tk.input = p;
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = TK_NE;
+      token->input = p;
+      vec_push(tokens, token);
       p += 2;
+      continue;
     }
 
     if (strncmp(p, "<=", 2) == 0) {
-      Token tk;
-      tk.ty = TK_LE;
-      tk.input = p;
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = TK_LE;
+      token->input = p;
+      vec_push(tokens, token);
       p += 2;
+      continue;
     }
 
     if (strncmp(p, ">=", 2) == 0) {
-      Token tk;
-      tk.ty = TK_GE;
-      tk.input = p;
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = TK_GE;
+      token->input = p;
+      vec_push(tokens, token);
       p += 2;
+      continue;
     }
 
     // `+` または `-` であればtokensに格納する
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>') {
-      Token tk;
-      tk.ty = *p;
-      tk.input = p;
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = *p;
+      token->input = p;
+      vec_push(tokens, token);
       p++;
       continue;
     }
 
     if (isdigit(*p)) {
-      Token tk;
-      tk.ty = TK_NUM;
-      tk.input = p;
-      tk.val = strtol(p, &p, 10);
-      vec_push(tokens, &tk);
-      i++;
+      token->ty = TK_NUM;
+      token->input = p;
+      token->val = strtol(p, &p, 10);
+      vec_push(tokens, token);
       continue;
     }
 
     error_at(p, "トークナイズできません");
   }
 
-  Token tk;
-  tk.ty = TK_EOF;
-  tk.input = p;
-  vec_push(tokens, &tk);
+  Token *token = malloc(sizeof(Token));
+  token->ty = TK_EOF;
+  token->input = p;
+  vec_push(tokens, token);
 }
 
 // node
@@ -219,7 +212,8 @@ Node *new_node_num(int val) {
 int pos = 0;
 
 int consume(int ty) {
-  if (((Token *)(tokens->data[pos]))->ty != ty)
+  Token *token = tokens->data[pos];
+  if (token->ty != ty)
     return 0;
   pos++;
   return 1;
@@ -320,19 +314,23 @@ Node *unary() {
 // 括弧、数字
 // term = num | "(" expr ")" と対応
 Node *term() {
+  Token *token = tokens->data[pos];
+
   if (consume('(')) {
     Node *node = expr();
     if (!consume(')'))
-      error_at(((Token *)(tokens->data[pos]))->input, "閉じカッコに対応するカッコがありません");
+      error_at(token->input, "閉じカッコに対応するカッコがありません");
 
     return node;
   }
 
   // カッコでなければ数値
-  if (((Token *)(tokens->data[pos]))->ty == TK_NUM)
-    return new_node_num(((Token *)(tokens->data[pos++]))->val);
+  if (token->ty == TK_NUM) {
+    Token *next_token = tokens->data[pos++];
+    return new_node_num(next_token->val);
+  }
 
-  error_at(((Token *)(tokens->data[pos]))->input, "数値でもカッコでもないトークン");
+  error_at(token->input, "数値でもカッコでもないトークン");
 }
 
 // アセンブリコード生成
