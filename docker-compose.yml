@@ -8,3 +8,7 @@ services:
       - tail
       - -f
       - /dev/null
+    cap_add:
+      - SYS_PTRACE
+    # security_opt:
+    #   - seccomp

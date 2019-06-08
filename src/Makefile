@@ -1,6 +1,9 @@
+CFLAGS=-g -O0
+
 tim: tim.c
 
 test: tim
+				./tim -test
 				./test.sh
 
 clean:
