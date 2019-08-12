@@ -1,7 +1,7 @@
 version: '3'
 services:
   main:
-    build: .
+    image: mkusaka/compiler_env:2019-07-20
     volumes:
     - ./src:/home/src/
     entrypoint:
@@ -10,5 +10,7 @@ services:
       - /dev/null
     cap_add:
       - SYS_PTRACE
+    environment:
+      - TERM=xterm-256color
     # security_opt:
     #   - seccomp
